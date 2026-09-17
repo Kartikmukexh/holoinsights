@@ -47,6 +47,10 @@
     </div>
     </div>
 
+  <div style="background:#101623; border:1px solid #232d42; border-left:3px solid #e8a33d; border-radius:0 10px 10px 0; padding:18px 20px; margin-top:24px;">
+    <div style="font-size:11px; color:#e8a33d; margin-bottom:8px; letter-spacing:0.05em;">AI-NARRATED INSIGHT</div>
+    <div id="insightText" style="font-size:15px; line-height:1.5;">Select a question below to see the AI-generated insight here.</div>
+  </div>
   <div style="display:flex; gap:10px; margin-top:24px; flex-wrap:wrap;">
     <button class="q-btn" data-q="performance" style="background:#131b2b; border:1px solid #232d42; color:#eef1f7; padding:10px 16px; border-radius:20px; cursor:pointer; font-size:13px;">How did revenue perform this quarter?</button>
     <button class="q-btn" data-q="underperform" style="background:#131b2b; border:1px solid #232d42; color:#eef1f7; padding:10px 16px; border-radius:20px; cursor:pointer; font-size:13px;">Which region is underperforming?</button>
@@ -95,6 +99,12 @@
       { label: 'Aug', value: 2.9, color: 0x5eead4 },
       { label: 'Sep', value: 3.1, color: 0x5eead4 },
     ],
+  };
+
+  const insightTexts = {
+    performance: "Total revenue reached $13.7 million this quarter, up 18% from last quarter. APAC was the standout, growing 34% and now the largest contributor — North America held steady, while EMEA softened.",
+    underperform: "EMEA is the region to watch — revenue fell 6% quarter over quarter, the only region in decline. Every other region grew.",
+    trend: "Revenue has climbed every month since April, from $1.9 million to $3.1 million — a steady upward trend that accelerated in August and September.",
   };
 
   let currentBars = [];
@@ -147,6 +157,7 @@
   document.querySelectorAll('.q-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       buildChart(datasets[btn.dataset.q]);
+      document.getElementById('insightText').textContent = insightTexts[btn.dataset.q];
     });
   });
 
