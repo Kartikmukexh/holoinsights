@@ -107,6 +107,14 @@
     trend: "Revenue has climbed every month since April, from $1.9 million to $3.1 million — a steady upward trend that accelerated in August and September.",
   };
 
+  function speak(text) {
+    if (!('speechSynthesis' in window)) return; // silently skip if unsupported
+    window.speechSynthesis.cancel(); // stop any speech already playing
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 1.0;
+    window.speechSynthesis.speak(utterance);
+  }
+
   let currentBars = [];
 
   function animateBar(bar, fromScale, toScale, duration, onComplete) {
@@ -157,7 +165,9 @@
   document.querySelectorAll('.q-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       buildChart(datasets[btn.dataset.q]);
-      document.getElementById('insightText').textContent = insightTexts[btn.dataset.q];
+      const text = insightTexts[btn.dataset.q];
+      document.getElementById('insightText').textContent = text;
+      speak(text);
     });
   });
 
