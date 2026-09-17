@@ -47,6 +47,11 @@
     </div>
     </div>
 
+  <div style="display:flex; gap:10px; margin-top:24px; flex-wrap:wrap;">
+    <button class="q-btn" data-q="performance" style="background:#131b2b; border:1px solid #232d42; color:#eef1f7; padding:10px 16px; border-radius:20px; cursor:pointer; font-size:13px;">How did revenue perform this quarter?</button>
+    <button class="q-btn" data-q="underperform" style="background:#131b2b; border:1px solid #232d42; color:#eef1f7; padding:10px 16px; border-radius:20px; cursor:pointer; font-size:13px;">Which region is underperforming?</button>
+    <button class="q-btn" data-q="trend" style="background:#131b2b; border:1px solid #232d42; color:#eef1f7; padding:10px 16px; border-radius:20px; cursor:pointer; font-size:13px;">What's the monthly trend?</button>
+  </div>
   <div id="scene-container" style="width:100%; height:300px; margin-top:24px; border:1px solid #232d42; border-radius:10px;"></div>
 
 </div>
@@ -69,33 +74,62 @@
   light.position.set(3, 5, 5);
   scene.add(light);
 
-  // Sample data: revenue by region ($M)
-  const data = [
-    { label: 'NA', value: 4.2, color: 0x5eead4 },
-    { label: 'EMEA', value: 2.6, color: 0xe8746b },
-    { label: 'APAC', value: 5.1, color: 0x5eead4 },
-    { label: 'LatAm', value: 1.8, color: 0x5eead4 },
-  ];
+  const datasets = {
+    performance: [
+      { label: 'NA', value: 4.2, color: 0x5eead4 },
+      { label: 'EMEA', value: 2.6, color: 0x5eead4 },
+      { label: 'APAC', value: 5.1, color: 0x5eead4 },
+      { label: 'LatAm', value: 1.8, color: 0x5eead4 },
+    ],
+    underperform: [
+      { label: 'NA', value: 4.2, color: 0x5eead4 },
+      { label: 'EMEA', value: 2.6, color: 0xe8746b },
+      { label: 'APAC', value: 5.1, color: 0x5eead4 },
+      { label: 'LatAm', value: 1.8, color: 0x5eead4 },
+    ],
+    trend: [
+      { label: 'Apr', value: 1.9, color: 0x5eead4 },
+      { label: 'May', value: 2.1, color: 0x5eead4 },
+      { label: 'Jun', value: 2.3, color: 0x5eead4 },
+      { label: 'Jul', value: 2.6, color: 0x5eead4 },
+      { label: 'Aug', value: 2.9, color: 0x5eead4 },
+      { label: 'Sep', value: 3.1, color: 0x5eead4 },
+    ],
+  };
 
-  const barWidth = 0.8;
-  const spacing = 1.3;
-  const startX = -((data.length - 1) * spacing) / 2;
-  const bars = [];
+  let currentBars = [];
 
-  data.forEach((d, i) => {
-    const height = d.value * 0.6; // scale value to a reasonable 3D height
-    const geometry = new THREE.BoxGeometry(barWidth, height, barWidth);
-    const material = new THREE.MeshStandardMaterial({ color: d.color });
-    const bar = new THREE.Mesh(geometry, material);
-    bar.position.x = startX + i * spacing;
-    bar.position.y = height / 2; // so it sits on the "floor" instead of centered
-    scene.add(bar);
-    bars.push(bar);
+  function buildChart(data) {
+    // remove old bars
+    currentBars.forEach(bar => scene.remove(bar));
+    currentBars = [];
+
+    const spacing = 1.3;
+    const startX = -((data.length - 1) * spacing) / 2;
+
+    data.forEach((d, i) => {
+      const height = d.value * 0.6;
+      const geometry = new THREE.BoxGeometry(0.8, height, 0.8);
+      const material = new THREE.MeshStandardMaterial({ color: d.color });
+      const bar = new THREE.Mesh(geometry, material);
+      bar.position.x = startX + i * spacing;
+      bar.position.y = height / 2;
+      scene.add(bar);
+      currentBars.push(bar);
+    });
+  }
+
+  document.querySelectorAll('.q-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      buildChart(datasets[btn.dataset.q]);
+    });
   });
+
+  buildChart(datasets.performance); // initial view
 
   function animate() {
     requestAnimationFrame(animate);
-    scene.rotation.y += 0.003; // slow spin so all bars are visible
+    scene.rotation.y += 0.003;
     renderer.render(scene, camera);
   }
   animate();
