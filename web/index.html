@@ -99,9 +99,30 @@
 
   let currentBars = [];
 
+  function animateBar(bar, fromScale, toScale, duration, onComplete) {
+    const start = performance.now();
+    const fullY = bar.userData.fullY;
+    function step(now) {
+      const t = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - t, 3);
+      const s = fromScale + (toScale - fromScale) * eased;
+      bar.scale.y = s;
+      bar.position.y = fullY * s;
+      bar.material.opacity = s;
+      if (t < 1) {
+        requestAnimationFrame(step);
+      } else if (onComplete) {
+        onComplete();
+      }
+    }
+    requestAnimationFrame(step);
+  }
+
   function buildChart(data) {
-    // remove old bars
-    currentBars.forEach(bar => scene.remove(bar));
+    const oldBars = currentBars;
+    oldBars.forEach(bar => {
+      animateBar(bar, 1, 0.001, 250, () => scene.remove(bar));
+    });
     currentBars = [];
 
     const spacing = 1.3;
@@ -110,12 +131,16 @@
     data.forEach((d, i) => {
       const height = d.value * 0.6;
       const geometry = new THREE.BoxGeometry(0.8, height, 0.8);
-      const material = new THREE.MeshStandardMaterial({ color: d.color });
+      const material = new THREE.MeshStandardMaterial({ color: d.color, transparent: true, opacity: 0 });
       const bar = new THREE.Mesh(geometry, material);
       bar.position.x = startX + i * spacing;
-      bar.position.y = height / 2;
+      bar.userData.fullY = height / 2;
+      bar.scale.y = 0.001;
+      bar.position.y = 0;
       scene.add(bar);
       currentBars.push(bar);
+
+      setTimeout(() => animateBar(bar, 0.001, 1, 400), 260 + i * 60);
     });
   }
 
@@ -125,7 +150,7 @@
     });
   });
 
-  buildChart(datasets.performance); // initial view
+  buildChart(datasets.performance);
 
   function animate() {
     requestAnimationFrame(animate);
