@@ -1,0 +1,22 @@
+# Unity generated files
+unity/[Ll]ibrary/
+unity/[Tt]emp/
+unity/[Oo]bj/
+unity/[Ll]ogs/
+unity/[Uu]ser[Ss]ettings/
+unity/[Bb]uild/
+unity/[Bb]uilds/
+unity/[Mm]emoryCaptures/
+unity/[Rr]ecordings/
+
+# Visual Studio / IDE generated files
+unity/.vs/
+*.csproj
+*.sln
+*.user
+*.userprefs
+
+# Operating system files
+.DS_Store
+Thumbs.db
+Desktop.ini
