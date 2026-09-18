@@ -1,4 +1,4 @@
-\# HoloInsights
+# HoloInsights
 
 
 
@@ -10,7 +10,7 @@ The intended HoloInsights experience allows a user to ask a business question, r
 
 
 
-This repository currently contains \*\*two parallel prototype tracks\*\*:
+This repository currently contains **two parallel prototype tracks**:
 
 
 
@@ -24,11 +24,11 @@ Both approaches are currently at an intermediate prototype stage. The project is
 
 
 
-\---
+---
 
 
 
-\## Repository Structure
+## Repository Structure
 
 
 
@@ -60,7 +60,7 @@ holoinsights/
 
 
 
-\### `web/`
+### `web/`
 
 
 
@@ -72,7 +72,7 @@ This prototype focuses on validating the HoloInsights interaction flow and 3D da
 
 
 
-\### `unity/`
+### `unity/`
 
 
 
@@ -84,11 +84,11 @@ This prototype focuses on developing the project toward a headset-based mixed-re
 
 
 
-\---
+---
 
 
 
-\# Prototype Track 1: Browser / WebXR Direction
+# Prototype Track 1: Browser / WebXR Direction
 
 
 
@@ -96,11 +96,11 @@ The browser prototype demonstrates the core HoloInsights interaction loop using 
 
 
 
-It currently uses \*\*Three.js for genuine WebGL-rendered 3D visualisation\*\*, but an immersive WebXR session has not yet been implemented. The browser prototype should therefore currently be considered a \*\*Three.js-based prototype being developed toward WebXR\*\*, rather than a completed WebXR application.
+It currently uses **Three.js for genuine WebGL-rendered 3D visualisation**, but an immersive WebXR session has not yet been implemented. The browser prototype should therefore currently be considered a **Three.js-based prototype being developed toward WebXR**, rather than a completed WebXR application.
 
 
 
-\## Current Browser Features
+## Current Browser Features
 
 
 
@@ -134,7 +134,7 @@ It currently uses \*\*Three.js for genuine WebGL-rendered 3D visualisation\*\*, 
 
 
 
-\## Example Interaction
+## Example Interaction
 
 
 
@@ -164,15 +164,15 @@ The prototype then:
 
 
 
-\## Important AI Limitation
+## Important AI Limitation
 
 
 
-The current browser prototype does \*\*not\*\* use a live AI model, Azure OpenAI or another LLM service.
+The current browser prototype does **not** use a live AI model, Azure OpenAI or another LLM service.
 
 
 
-The current insight layer is a \*\*simulated AI implementation\*\*. Natural-language insight responses are pre-written and selected using simple keyword matching.
+The current insight layer is a **simulated AI implementation**. Natural-language insight responses are pre-written and selected using simple keyword matching.
 
 
 
@@ -180,7 +180,7 @@ This allows the team to prototype and evaluate the intended interaction flow bef
 
 
 
-\## WebXR Status
+## WebXR Status
 
 
 
@@ -206,11 +206,11 @@ Current work includes Three.js 3D rendering and browser interaction, while futur
 
 
 
-\---
+---
 
 
 
-\# Prototype Track 2: Unity / OpenXR Direction
+# Prototype Track 2: Unity / OpenXR Direction
 
 
 
@@ -222,7 +222,7 @@ The Unity prototype currently uses the Unity Mixed Reality project foundation an
 
 
 
-\## Current Unity Features
+## Current Unity Features
 
 
 
@@ -250,7 +250,7 @@ The Unity prototype currently uses the Unity Mixed Reality project foundation an
 
 
 
-\## Current Interaction
+## Current Interaction
 
 
 
@@ -270,7 +270,7 @@ to switch between two sample datasets.
 
 
 
-\### Dataset 1
+### Dataset 1
 
 
 
@@ -300,7 +300,7 @@ and Product C by 37.
 
 
 
-\### Dataset 2
+### Dataset 2
 
 
 
@@ -334,11 +334,11 @@ The associated 3D bars resize automatically when the dataset changes.
 
 
 
-\---
+---
 
 
 
-\# Why Two Prototype Tracks?
+# Why Two Prototype Tracks?
 
 
 
@@ -404,15 +404,15 @@ Later development and headset testing will help determine whether one implementa
 
 
 
-\---
+---
 
 
 
-\# Technologies
+# Technologies
 
 
 
-\## Browser Prototype
+## Browser Prototype
 
 
 
@@ -444,7 +444,7 @@ No npm packages, Node.js build process or JavaScript framework are required.
 
 
 
-\## Unity Prototype
+## Unity Prototype
 
 
 
@@ -466,15 +466,15 @@ Development has currently been performed using desktop preview because headset a
 
 
 
-\---
+---
 
 
 
-\# Running the Browser Prototype
+# Running the Browser Prototype
 
 
 
-\## Requirements
+## Requirements
 
 
 
@@ -486,7 +486,7 @@ Voice recognition may not work consistently in every browser.
 
 
 
-\## Steps
+## Steps
 
 
 
@@ -538,7 +538,7 @@ http://127.0.0.1:5500/web/index.html
 
 
 
-\### Browser Notes
+### Browser Notes
 
 
 
@@ -550,15 +550,15 @@ http://127.0.0.1:5500/web/index.html
 
 
 
-\---
+---
 
 
 
-\# Running the Unity Prototype
+# Running the Unity Prototype
 
 
 
-\## Recommended Unity Version
+## Recommended Unity Version
 
 
 
@@ -572,7 +572,7 @@ Unity 6.6
 
 
 
-\## Steps
+## Steps
 
 
 
@@ -584,7 +584,7 @@ Unity 6.6
 
 
 
-3\. Select \*\*Add project from disk\*\*.
+3\. Select **Add project from disk**.
 
 
 
@@ -616,7 +616,7 @@ Assets/Scenes/HoloInsightsScene.unity
 
 
 
-7\. Select the \*\*Game\*\* tab.
+7\. Select the **Game** tab.
 
 
 
@@ -644,11 +644,11 @@ to switch between the two sample datasets.
 
 
 
-\---
+---
 
 
 
-\# Current Prototype Limitations
+# Current Prototype Limitations
 
 
 
@@ -686,15 +686,15 @@ These limitations are part of the ongoing technical evaluation and will inform t
 
 
 
-\---
+---
 
 
 
-\# Current Development Status
+# Current Development Status
 
 
 
-\## Browser Track
+## Browser Track
 
 
 
@@ -736,7 +736,7 @@ Still to investigate:
 
 
 
-\## Unity Track
+## Unity Track
 
 
 
@@ -778,11 +778,11 @@ Still to investigate:
 
 
 
-\---
+---
 
 
 
-\# Development Approach
+# Development Approach
 
 
 
@@ -798,11 +798,11 @@ The next phase will focus on further testing, particularly on Meta Quest hardwar
 
 
 
-\---
+---
 
 
 
-\# Academic Prototype Notice
+# Academic Prototype Notice
 
 
 
