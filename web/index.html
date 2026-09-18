@@ -51,6 +51,10 @@
     <div style="font-size:11px; color:#e8a33d; margin-bottom:8px; letter-spacing:0.05em;">AI-NARRATED INSIGHT</div>
     <div id="insightText" style="font-size:15px; line-height:1.5;">Select a question below to see the AI-generated insight here.</div>
   </div>
+  <div style="display:flex; align-items:center; gap:12px; margin-top:24px;">
+    <button id="micBtn" style="width:44px; height:44px; border-radius:50%; border:1px solid #232d42; background:#131b2b; color:#eef1f7; cursor:pointer; font-size:18px;">🎙</button>
+    <span id="micStatus" style="font-size:12px; color:#8b95ab;">Click the mic and ask a question out loud</span>
+  </div>
   <div style="display:flex; gap:10px; margin-top:24px; flex-wrap:wrap;">
     <button class="q-btn" data-q="performance" style="background:#131b2b; border:1px solid #232d42; color:#eef1f7; padding:10px 16px; border-radius:20px; cursor:pointer; font-size:13px;">How did revenue perform this quarter?</button>
     <button class="q-btn" data-q="underperform" style="background:#131b2b; border:1px solid #232d42; color:#eef1f7; padding:10px 16px; border-radius:20px; cursor:pointer; font-size:13px;">Which region is underperforming?</button>
@@ -172,6 +176,47 @@
   });
 
   buildChart(datasets.performance);
+
+  const micBtn = document.getElementById('micBtn');
+  const micStatus = document.getElementById('micStatus');
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  function matchQuestion(said) {
+    const s = said.toLowerCase();
+    if (s.includes('underperform') || s.includes('worst') || s.includes('declin')) return 'underperform';
+    if (s.includes('trend') || s.includes('month')) return 'trend';
+    if (s.includes('perform') || s.includes('revenue') || s.includes('quarter')) return 'performance';
+    return null;
+  }
+
+  if (!SpeechRecognition) {
+    micBtn.disabled = true;
+    micStatus.textContent = 'Voice input not supported in this browser — try Chrome.';
+  } else {
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'en-US';
+
+    micBtn.addEventListener('click', () => {
+      recognition.start();
+      micStatus.textContent = 'Listening...';
+    });
+
+    recognition.addEventListener('result', (e) => {
+      const said = e.results[0][0].transcript;
+      const matched = matchQuestion(said);
+      micStatus.textContent = `Heard: "${said}"`;
+      if (matched) {
+        buildChart(datasets[matched]);
+        const text = insightTexts[matched];
+        document.getElementById('insightText').textContent = text;
+        speak(text);
+      }
+    });
+
+    recognition.addEventListener('error', () => {
+      micStatus.textContent = "Didn't catch that — try again or use the buttons.";
+    });
+  }
 
   function animate() {
     requestAnimationFrame(animate);
