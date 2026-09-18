@@ -20,3 +20,7 @@ unity/.vs/
 .DS_Store
 Thumbs.db
 Desktop.ini
+
+# VS Code / Visual Studio generated files
+unity/.vscode/
+*.slnx
