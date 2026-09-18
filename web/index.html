@@ -72,6 +72,23 @@
   camera.position.set(0, 1.1, 6.5);
   camera.lookAt(0, 0.7, 0);
 
+  const baseCameraPos = { x: 0, y: 1.1, z: 6.5 };
+  let targetOffsetX = 0;
+  let targetOffsetY = 0;
+
+  container.addEventListener('mousemove', (e) => {
+    const rect = container.getBoundingClientRect();
+    const nx = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+    const ny = ((e.clientY - rect.top) / rect.height) * 2 - 1;
+    targetOffsetX = nx * 0.6;
+    targetOffsetY = -ny * 0.3;
+  });
+
+  container.addEventListener('mouseleave', () => {
+    targetOffsetX = 0;
+    targetOffsetY = 0;
+  });
+
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
   renderer.setSize(container.clientWidth, container.clientHeight);
   container.appendChild(renderer.domElement);
@@ -263,6 +280,11 @@
   function animate() {
     requestAnimationFrame(animate);
     scene.rotation.y += 0.003;
+
+    camera.position.x += (baseCameraPos.x + targetOffsetX - camera.position.x) * 0.05;
+    camera.position.y += (baseCameraPos.y + targetOffsetY - camera.position.y) * 0.05;
+    camera.lookAt(0, 0.7, 0);
+
     updateLabels();
     renderer.render(scene, camera);
   }
