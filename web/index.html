@@ -49,7 +49,7 @@
 
   <div style="background:#101623; border:1px solid #232d42; border-left:3px solid #e8a33d; border-radius:0 10px 10px 0; padding:18px 20px; margin-top:24px;">
     <div style="font-size:11px; color:#e8a33d; margin-bottom:8px; letter-spacing:0.05em;">AI-NARRATED INSIGHT</div>
-    <div id="insightText" style="font-size:15px; line-height:1.5;">Select a question below to see the AI-generated insight here.</div>
+    <div id="insightText" style="font-size:15px; line-height:1.5; transition: opacity 0.3s;">Select a question below to see the AI-generated insight here.</div>
   </div>
   <div style="display:flex; align-items:center; gap:12px; margin-top:24px;">
     <button id="micBtn" style="width:44px; height:44px; border-radius:50%; border:1px solid #232d42; background:#131b2b; color:#eef1f7; cursor:pointer; font-size:18px;">🎙</button>
@@ -188,12 +188,22 @@
     });
   }
 
+  function showInsight(key) {
+    buildChart(datasets[key]);
+    const insightEl = document.getElementById('insightText');
+    insightEl.style.opacity = '0.4';
+    insightEl.textContent = 'Generating insight...';
+    setTimeout(() => {
+      const text = insightTexts[key];
+      insightEl.textContent = text;
+      insightEl.style.opacity = '1';
+      speak(text);
+    }, 600);
+  }
+
   document.querySelectorAll('.q-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      buildChart(datasets[btn.dataset.q]);
-      const text = insightTexts[btn.dataset.q];
-      document.getElementById('insightText').textContent = text;
-      speak(text);
+      showInsight(btn.dataset.q);
     });
   });
 
@@ -228,10 +238,7 @@
       const matched = matchQuestion(said);
       micStatus.textContent = `Heard: "${said}"`;
       if (matched) {
-        buildChart(datasets[matched]);
-        const text = insightTexts[matched];
-        document.getElementById('insightText').textContent = text;
-        speak(text);
+        showInsight(matched);
       }
     });
 
