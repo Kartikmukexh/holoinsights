@@ -24,3 +24,7 @@ Desktop.ini
 # VS Code / Visual Studio generated files
 unity/.vscode/
 *.slnx
+# Backend / Python generated files 
+backend/venv/ 
+backend/__pycache__/
+backend/.env *.pyc
