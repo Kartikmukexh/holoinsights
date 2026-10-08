@@ -1,3 +1,4 @@
+
 # Unity generated files
 unity/[Ll]ibrary/
 unity/[Tt]emp/
@@ -24,7 +25,10 @@ Desktop.ini
 # VS Code / Visual Studio generated files
 unity/.vscode/
 *.slnx
-# Backend / Python generated files 
-backend/venv/ 
+
+# Backend / Python generated files
+backend/venv/
+backend/.venv/
 backend/__pycache__/
-backend/.env *.pyc
+backend/.env
+*.pyc
