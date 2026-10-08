@@ -1,3 +1,4 @@
+
 using UnityEngine;
 using TMPro;
 using UnityEngine.InputSystem;
@@ -45,16 +46,22 @@ public class DashboardController : MonoBehaviour
         if (Keyboard.current != null &&
             Keyboard.current.spaceKey.wasPressedThisFrame)
         {
-            showingSecondDataset = !showingSecondDataset;
+            SwitchDataset();
+        }
+    }
 
-            if (showingSecondDataset)
-            {
-                ShowDatasetTwo();
-            }
-            else
-            {
-                ShowDatasetOne();
-            }
+    // Can be called by keyboard, UI button or XR interaction.
+    public void SwitchDataset()
+    {
+        showingSecondDataset = !showingSecondDataset;
+
+        if (showingSecondDataset)
+        {
+            ShowDatasetTwo();
+        }
+        else
+        {
+            ShowDatasetOne();
         }
     }
 
@@ -136,7 +143,7 @@ public class DashboardController : MonoBehaviour
 
         Vector3 newPosition = basePosition;
 
-        // Move the bar so its bottom stays approximately in the same place.
+        // Keep the bottom of the bar approximately fixed.
         newPosition.y =
             basePosition.y + (newScale.y - baseScale.y) / 2f;
 
