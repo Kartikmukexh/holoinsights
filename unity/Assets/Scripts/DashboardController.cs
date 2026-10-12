@@ -15,7 +15,7 @@ public class DashboardController : MonoBehaviour
     public TMP_Text productBLabel;
     public TMP_Text productCLabel;
 
-    [Header("AI Insight")]
+    [Header("Sales Insight")]
     public TMP_Text insightText;
 
     [Header("Backend")]
@@ -27,7 +27,10 @@ public class DashboardController : MonoBehaviour
     public float barBaselineY = -0.35f;
 
     private SalesResponse salesResponse;
-    private bool showingSecondDataset = false;
+
+    // 0 = North Q1, 1 = South Q1,
+    // 2 = North Q2, 3 = South Q2.
+    private int datasetIndex = 0;
 
     private void Awake()
     {
@@ -79,10 +82,10 @@ public class DashboardController : MonoBehaviour
         }
     }
 
-    // Used by the keyboard, mouse button and XR interaction.
+    // Called by keyboard, desktop mouse or XR selection.
     public void SwitchDataset()
     {
-        showingSecondDataset = !showingSecondDataset;
+        datasetIndex = (datasetIndex + 1) % 4;
         RefreshDashboard();
     }
 
@@ -107,8 +110,8 @@ public class DashboardController : MonoBehaviour
             return;
         }
 
-        string region = showingSecondDataset ? "South" : "North";
-        string quarter = "Q1";
+        string region = datasetIndex % 2 == 0 ? "North" : "South";
+        string quarter = datasetIndex < 2 ? "Q1" : "Q2";
 
         float a = GetRevenue("Product A", region, quarter);
         float b = GetRevenue("Product B", region, quarter);
@@ -123,14 +126,13 @@ public class DashboardController : MonoBehaviour
         productCLabel.text = "C - " + (c / 1000f).ToString("0.#") + "K";
 
         float highestRevenue = Mathf.Max(a, b, c);
-
         string leadingProduct = "Product A";
 
-        if (highestRevenue == b)
+        if (b > a && b >= c)
         {
             leadingProduct = "Product B";
         }
-        else if (highestRevenue == c)
+        else if (c > a && c > b)
         {
             leadingProduct = "Product C";
         }
@@ -163,8 +165,8 @@ public class DashboardController : MonoBehaviour
 
     private void SetBar(Transform bar, float revenue)
     {
-        // All bars use the same revenue scale.
-        float ratio = Mathf.Max(0f, revenue) / Mathf.Max(1f, maximumRevenue);
+        float ratio = Mathf.Max(0f, revenue) /
+                      Mathf.Max(1f, maximumRevenue);
 
         float height = maximumBarHeight * ratio;
 
