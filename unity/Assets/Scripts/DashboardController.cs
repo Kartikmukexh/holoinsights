@@ -83,9 +83,27 @@ public class DashboardController : MonoBehaviour
     }
 
     // Called by keyboard, desktop mouse or XR selection.
+    // Existing button, keyboard and XR interaction.
     public void SwitchDataset()
     {
         datasetIndex = (datasetIndex + 1) % 4;
+        RefreshDashboard();
+    }
+
+    // Switch between North and South without changing the quarter.
+    public void SwitchRegion()
+    {
+        datasetIndex = datasetIndex % 2 == 0
+            ? datasetIndex + 1
+            : datasetIndex - 1;
+
+        RefreshDashboard();
+    }
+
+    // Switch between Q1 and Q2 without changing the region.
+    public void SwitchQuarter()
+    {
+        datasetIndex = (datasetIndex + 2) % 4;
         RefreshDashboard();
     }
 

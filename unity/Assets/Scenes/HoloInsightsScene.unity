@@ -1652,6 +1652,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DesktopDatasetButton
   dashboardController: {fileID: 1695601773}
+  buttonAction: 1
 --- !u!114 &780925420
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1697,7 +1698,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1695601773}
         m_TargetAssemblyTypeName: DashboardController, Assembly-CSharp
-        m_MethodName: SwitchDataset
+        m_MethodName: SwitchRegion
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -2224,6 +2225,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DesktopDatasetButton
   dashboardController: {fileID: 1695601773}
+  buttonAction: 0
 --- !u!1 &1056673790
 GameObject:
   m_ObjectHideFlags: 0
@@ -5546,6 +5548,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DesktopDatasetButton
   dashboardController: {fileID: 1695601773}
+  buttonAction: 2
 --- !u!114 &2102396741
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5591,7 +5594,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1695601773}
         m_TargetAssemblyTypeName: DashboardController, Assembly-CSharp
-        m_MethodName: SwitchDataset
+        m_MethodName: SwitchQuarter
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
