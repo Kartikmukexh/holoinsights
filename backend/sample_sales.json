@@ -1,0 +1,18 @@
+﻿
+[
+  {"product_name": "Product A", "region": "North", "quarter": "Q1", "revenue": 85000},
+  {"product_name": "Product B", "region": "North", "quarter": "Q1", "revenue": 62000},
+  {"product_name": "Product C", "region": "North", "quarter": "Q1", "revenue": 48000},
+
+  {"product_name": "Product A", "region": "South", "quarter": "Q1", "revenue": 60000},
+  {"product_name": "Product B", "region": "South", "quarter": "Q1", "revenue": 78000},
+  {"product_name": "Product C", "region": "South", "quarter": "Q1", "revenue": 55000},
+
+  {"product_name": "Product A", "region": "North", "quarter": "Q2", "revenue": 92000},
+  {"product_name": "Product B", "region": "North", "quarter": "Q2", "revenue": 68000},
+  {"product_name": "Product C", "region": "North", "quarter": "Q2", "revenue": 52000},
+
+  {"product_name": "Product A", "region": "South", "quarter": "Q2", "revenue": 71000},
+  {"product_name": "Product B", "region": "South", "quarter": "Q2", "revenue": 84000},
+  {"product_name": "Product C", "region": "South", "quarter": "Q2", "revenue": 59000}
+]
