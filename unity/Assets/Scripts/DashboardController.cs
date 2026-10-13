@@ -15,33 +15,65 @@ public class DashboardController : MonoBehaviour
     public TMP_Text productBLabel;
     public TMP_Text productCLabel;
 
-    [Header("AI Insight")]
+    [Header("Sales Insight")]
     public TMP_Text insightText;
 
-    private Vector3 productABaseScale;
-    private Vector3 productBBaseScale;
-    private Vector3 productCBaseScale;
+    [Header("Backend")]
+    public SalesDataClient salesDataClient;
 
-    private Vector3 productABasePosition;
-    private Vector3 productBBasePosition;
-    private Vector3 productCBasePosition;
+    [Header("Chart Settings")]
+    public float maximumRevenue = 100000f;
+    public float maximumBarHeight = 0.45f;
+    public float barBaselineY = -0.35f;
 
-    private bool showingSecondDataset = false;
+    private SalesResponse salesResponse;
 
-    void Start()
+    // 0 = North Q1, 1 = South Q1,
+    // 2 = North Q2, 3 = South Q2.
+    private int datasetIndex = 0;
+
+    private void Awake()
     {
-        productABaseScale = productABar.localScale;
-        productBBaseScale = productBBar.localScale;
-        productCBaseScale = productCBar.localScale;
-
-        productABasePosition = productABar.localPosition;
-        productBBasePosition = productBBar.localPosition;
-        productCBasePosition = productCBar.localPosition;
-
-        ShowDatasetOne();
+        if (salesDataClient == null)
+        {
+            salesDataClient = GetComponent<SalesDataClient>();
+        }
     }
 
-    void Update()
+    private void OnEnable()
+    {
+        if (salesDataClient != null)
+        {
+            salesDataClient.OnSalesDataLoaded += HandleSalesDataLoaded;
+        }
+    }
+
+    private void Start()
+    {
+        if (salesDataClient == null)
+        {
+            insightText.text = "Sales data client is not configured.";
+            Debug.LogError("HoloInsights: SalesDataClient is missing.");
+            return;
+        }
+
+        insightText.text = "Loading sales data...";
+
+        if (salesDataClient.LatestResponse != null)
+        {
+            HandleSalesDataLoaded(salesDataClient.LatestResponse);
+        }
+    }
+
+    private void OnDisable()
+    {
+        if (salesDataClient != null)
+        {
+            salesDataClient.OnSalesDataLoaded -= HandleSalesDataLoaded;
+        }
+    }
+
+    private void Update()
     {
         if (Keyboard.current != null &&
             Keyboard.current.spaceKey.wasPressedThisFrame)
@@ -50,103 +82,118 @@ public class DashboardController : MonoBehaviour
         }
     }
 
-    // Can be called by keyboard, UI button or XR interaction.
+    // Called by keyboard, desktop mouse or XR selection.
+    // Existing button, keyboard and XR interaction.
     public void SwitchDataset()
     {
-        showingSecondDataset = !showingSecondDataset;
-
-        if (showingSecondDataset)
-        {
-            ShowDatasetTwo();
-        }
-        else
-        {
-            ShowDatasetOne();
-        }
+        datasetIndex = (datasetIndex + 1) % 4;
+        RefreshDashboard();
     }
 
-    void ShowDatasetOne()
+    // Switch between North and South without changing the quarter.
+    public void SwitchRegion()
     {
-        SetBar(
-            productABar,
-            productABaseScale,
-            productABasePosition,
-            85f / 85f
+        datasetIndex = datasetIndex % 2 == 0
+            ? datasetIndex + 1
+            : datasetIndex - 1;
+
+        RefreshDashboard();
+    }
+
+    // Switch between Q1 and Q2 without changing the region.
+    public void SwitchQuarter()
+    {
+        datasetIndex = (datasetIndex + 2) % 4;
+        RefreshDashboard();
+    }
+
+    private void HandleSalesDataLoaded(SalesResponse response)
+    {
+        salesResponse = response;
+
+        Debug.Log(
+            "HoloInsights dashboard received " +
+            response.data.Length +
+            " sales records."
         );
 
-        SetBar(
-            productBBar,
-            productBBaseScale,
-            productBBasePosition,
-            62f / 62f
-        );
+        RefreshDashboard();
+    }
 
-        SetBar(
-            productCBar,
-            productCBaseScale,
-            productCBasePosition,
-            48f / 48f
-        );
+    private void RefreshDashboard()
+    {
+        if (salesResponse == null || salesResponse.data == null)
+        {
+            insightText.text = "Waiting for backend sales data...";
+            return;
+        }
 
-        productALabel.text = "A - 85";
-        productBLabel.text = "B - 62";
-        productCLabel.text = "C - 48";
+        string region = datasetIndex % 2 == 0 ? "North" : "South";
+        string quarter = datasetIndex < 2 ? "Q1" : "Q2";
+
+        float a = GetRevenue("Product A", region, quarter);
+        float b = GetRevenue("Product B", region, quarter);
+        float c = GetRevenue("Product C", region, quarter);
+
+        SetBar(productABar, a);
+        SetBar(productBBar, b);
+        SetBar(productCBar, c);
+
+        productALabel.text = "A - " + (a / 1000f).ToString("0.#") + "K";
+        productBLabel.text = "B - " + (b / 1000f).ToString("0.#") + "K";
+        productCLabel.text = "C - " + (c / 1000f).ToString("0.#") + "K";
+
+        float highestRevenue = Mathf.Max(a, b, c);
+        string leadingProduct = "Product A";
+
+        if (b > a && b >= c)
+        {
+            leadingProduct = "Product B";
+        }
+        else if (c > a && c > b)
+        {
+            leadingProduct = "Product C";
+        }
 
         insightText.text =
-            "Product A leads at 85, outperforming Product B by 23\n" +
-            "and Product C by 37.";
+            region + " " + quarter + " | " +
+            leadingProduct + " leads with $" +
+            (highestRevenue / 1000f).ToString("0.#") +
+            "K revenue.\nSource: " +
+            salesResponse.source +
+            " (data-derived summary)";
     }
 
-    void ShowDatasetTwo()
+    private float GetRevenue(string product, string region, string quarter)
     {
-        SetBar(
-            productABar,
-            productABaseScale,
-            productABasePosition,
-            60f / 85f
-        );
+        float total = 0f;
 
-        SetBar(
-            productBBar,
-            productBBaseScale,
-            productBBasePosition,
-            78f / 62f
-        );
+        foreach (SalesRecord record in salesResponse.data)
+        {
+            if (record.product_name == product &&
+                record.region == region &&
+                record.quarter == quarter)
+            {
+                total += record.revenue;
+            }
+        }
 
-        SetBar(
-            productCBar,
-            productCBaseScale,
-            productCBasePosition,
-            55f / 48f
-        );
-
-        productALabel.text = "A - 60";
-        productBLabel.text = "B - 78";
-        productCLabel.text = "C - 55";
-
-        insightText.text =
-            "Product B now leads at 78, outperforming Product A by 18\n" +
-            "and Product C by 23.";
+        return total;
     }
 
-    void SetBar(
-        Transform bar,
-        Vector3 baseScale,
-        Vector3 basePosition,
-        float heightMultiplier
-    )
+    private void SetBar(Transform bar, float revenue)
     {
-        Vector3 newScale = baseScale;
-        newScale.y = baseScale.y * heightMultiplier;
+        float ratio = Mathf.Max(0f, revenue) /
+                      Mathf.Max(1f, maximumRevenue);
 
-        bar.localScale = newScale;
+        float height = maximumBarHeight * ratio;
 
-        Vector3 newPosition = basePosition;
+        Vector3 scale = bar.localScale;
+        scale.y = height;
+        bar.localScale = scale;
 
-        // Keep the bottom of the bar approximately fixed.
-        newPosition.y =
-            basePosition.y + (newScale.y - baseScale.y) / 2f;
-
-        bar.localPosition = newPosition;
+        Vector3 position = bar.localPosition;
+        position.y = barBaselineY + height / 2f;
+        bar.localPosition = position;
     }
 }
