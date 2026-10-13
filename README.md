@@ -648,6 +648,48 @@ to switch between the two sample datasets.
 
 
 
+# Backend: Azure SQL + AI Insight API (Milestone 2)
+
+The `backend/` folder is a FastAPI service that connects the dashboards to the data layer.
+
+```
+Azure SQL (SalesData) --> FastAPI --> /api/summary, /api/sales-data, /api/insight --> Web / Unity
+                                          |
+                                          +--> LLM (GitHub Models or Gemini), else data-driven fallback
+```
+
+| Endpoint | Purpose |
+|---|---|
+| `GET /api/test-db` | Checks the Azure SQL connection |
+| `GET /api/sales-data` | Raw `SalesData` rows |
+| `GET /api/summary` | Aggregates: latest-quarter total and QoQ change, per-region revenue, quarterly trend |
+| `GET /api/insight?question=...` | One or two sentence answer. `source` is `llm` (AI generated) or `fallback` (computed from the SQL data when the LLM is unreachable) |
+
+## Run it
+
+```
+cd backend
+python -m venv venv
+venv\Scripts\activate          # Windows  (macOS/Linux: source venv/bin/activate)
+pip install -r requirements.txt
+copy .env.example .env          # then fill in your values (never commit .env)
+uvicorn main:app --reload
+```
+
+Requires ODBC Driver 18 for SQL Server, and your client IP added to the Azure SQL firewall.
+Set `LLM_PROVIDER=openai` (any OpenAI-compatible endpoint such as GitHub Models) or `gemini`.
+Restart uvicorn after editing `.env`.
+
+## Web prototype
+
+`web/index.html` calls `http://127.0.0.1:8000`. When the backend is up, the KPI cards, 3D bars and insight text come from Azure SQL
+(badge shows "Live: Azure SQL"); otherwise it falls back to built-in sample data (badge shows "Sample data").
+
+## Known limitations
+
+- The LLM call can fail on networks that intercept `models.github.ai` (observed on the RMIT network); the API then returns a clearly labelled data-driven answer instead.
+- The Unity project does not yet read from the backend API.
+
 # Current Prototype Limitations
 
 

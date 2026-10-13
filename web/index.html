@@ -28,27 +28,27 @@
 </head>
 <body>
 <div class="wrap">
-  <div class="wordmark">HOLOINSIGHTS</div>
+  <div class="wordmark">HOLOINSIGHTS <span id="dataBadge" style="font-weight:400; font-size:11px; color:#8b95ab; margin-left:10px; letter-spacing:0;">Sample data</span></div>
   <div class="cards">
     <div class="card">
-      <div class="label">Total revenue, Q3</div>
-      <div class="value">$13.7M</div>
-      <div class="delta">▲ 18% QoQ</div>
+      <div class="label" id="kpi1Label">Total revenue, Q3</div>
+      <div class="value" id="kpi1Value">$13.7M</div>
+      <div class="delta" id="kpi1Delta">▲ 18% QoQ</div>
     </div>
     <div class="card">
       <div class="label">Top region</div>
-      <div class="value">APAC</div>
-      <div class="delta">▲ 34% growth</div>
+      <div class="value" id="kpi2Value">APAC</div>
+      <div class="delta" id="kpi2Delta">▲ 34% growth</div>
     </div>
     <div class="card">
       <div class="label">Needs attention</div>
-      <div class="value">EMEA</div>
-      <div class="delta">▼ 6% decline</div>
+      <div class="value" id="kpi3Value">EMEA</div>
+      <div class="delta" id="kpi3Delta" style="color:#e8746b;">▼ 6% decline</div>
     </div>
     </div>
 
   <div style="background:#101623; border:1px solid #232d42; border-left:3px solid #e8a33d; border-radius:0 10px 10px 0; padding:18px 20px; margin-top:24px;">
-    <div style="font-size:11px; color:#e8a33d; margin-bottom:8px; letter-spacing:0.05em;">AI-NARRATED INSIGHT</div>
+    <div id="insightTag" style="font-size:11px; color:#e8a33d; margin-bottom:8px; letter-spacing:0.05em;">AI-NARRATED INSIGHT</div>
     <div id="insightText" style="font-size:15px; line-height:1.5; transition: opacity 0.3s;">Select a question below to see the AI-generated insight here.</div>
   </div>
   <div style="display:flex; align-items:center; gap:12px; margin-top:24px;">
@@ -107,28 +107,83 @@
   light.position.set(3, 5, 5);
   scene.add(light);
 
+  // ---- Backend wiring -------------------------------------------------
+  // Override with ?api=http://<laptop-ip>:8000 when opening the page on another device (e.g. Quest).
+  const API_BASE = new URLSearchParams(location.search).get('api') || 'http://127.0.0.1:8000';
+  const TEAL = 0x5eead4, RED = 0xe8746b;
+  const QUESTIONS = {
+    performance: 'How did revenue perform this quarter?',
+    underperform: 'Which region is underperforming?',
+    trend: "What's the monthly trend?",
+  };
+  let live = false; // true once /api/summary has loaded from Azure SQL
+
+  function fmtMoney(v) {
+    if (Math.abs(v) >= 1e6) return '$' + (v / 1e6).toFixed(1) + 'M';
+    if (Math.abs(v) >= 1e3) return '$' + (v / 1e3).toFixed(1) + 'K';
+    return '$' + v.toFixed(0);
+  }
+
+  // Sample data (used when the backend is unreachable). Values in dollars.
   const datasets = {
     performance: [
-      { label: 'NA', value: 4.2, color: 0x5eead4 },
-      { label: 'EMEA', value: 2.6, color: 0x5eead4 },
-      { label: 'APAC', value: 5.1, color: 0x5eead4 },
-      { label: 'LatAm', value: 1.8, color: 0x5eead4 },
+      { label: 'NA', value: 4.2e6, color: TEAL },
+      { label: 'EMEA', value: 2.6e6, color: TEAL },
+      { label: 'APAC', value: 5.1e6, color: TEAL },
+      { label: 'LatAm', value: 1.8e6, color: TEAL },
     ],
     underperform: [
-      { label: 'NA', value: 4.2, color: 0x5eead4 },
-      { label: 'EMEA', value: 2.6, color: 0xe8746b },
-      { label: 'APAC', value: 5.1, color: 0x5eead4 },
-      { label: 'LatAm', value: 1.8, color: 0x5eead4 },
+      { label: 'NA', value: 4.2e6, color: TEAL },
+      { label: 'EMEA', value: 2.6e6, color: RED },
+      { label: 'APAC', value: 5.1e6, color: TEAL },
+      { label: 'LatAm', value: 1.8e6, color: TEAL },
     ],
     trend: [
-      { label: 'Apr', value: 1.9, color: 0x5eead4 },
-      { label: 'May', value: 2.1, color: 0x5eead4 },
-      { label: 'Jun', value: 2.3, color: 0x5eead4 },
-      { label: 'Jul', value: 2.6, color: 0x5eead4 },
-      { label: 'Aug', value: 2.9, color: 0x5eead4 },
-      { label: 'Sep', value: 3.1, color: 0x5eead4 },
+      { label: 'Apr', value: 1.9e6, color: TEAL },
+      { label: 'May', value: 2.1e6, color: TEAL },
+      { label: 'Jun', value: 2.3e6, color: TEAL },
+      { label: 'Jul', value: 2.6e6, color: TEAL },
+      { label: 'Aug', value: 2.9e6, color: TEAL },
+      { label: 'Sep', value: 3.1e6, color: TEAL },
     ],
   };
+
+  function applySummary(sm) {
+    const regs = sm.regions || [];
+    if (!regs.length) return false;
+    datasets.performance = regs.map(r => ({ label: r.region, value: r.revenue, color: TEAL }));
+    const withChg = regs.filter(r => r.change_pct !== null);
+    const worst = (withChg.length ? withChg.reduce((a, b) => (b.change_pct < a.change_pct ? b : a))
+                                  : regs.reduce((a, b) => (b.revenue < a.revenue ? b : a)));
+    datasets.underperform = regs.map(r => ({ label: r.region, value: r.revenue, color: r === worst ? RED : TEAL }));
+    datasets.trend = sm.quarters.map(q => ({ label: q.quarter, value: q.revenue, color: TEAL }));
+
+    const top = regs.reduce((a, b) => (b.revenue > a.revenue ? b : a));
+    const arrow = v => (v === null ? '' : (v >= 0 ? '▲ ' : '▼ ') + Math.abs(v).toFixed(0) + '%');
+    document.getElementById('kpi1Label').textContent = 'Total revenue, ' + sm.latest_quarter;
+    document.getElementById('kpi1Value').textContent = fmtMoney(sm.total_latest);
+    document.getElementById('kpi1Delta').textContent = arrow(sm.total_change_pct) + (sm.total_change_pct === null ? '' : ' QoQ');
+    document.getElementById('kpi2Value').textContent = top.region;
+    document.getElementById('kpi2Delta').textContent = fmtMoney(top.revenue) + (top.change_pct === null ? '' : '  ' + arrow(top.change_pct));
+    document.getElementById('kpi3Value').textContent = worst.region;
+    document.getElementById('kpi3Delta').textContent = fmtMoney(worst.revenue) + (worst.change_pct === null ? '' : '  ' + arrow(worst.change_pct));
+    return true;
+  }
+
+  async function loadLiveData() {
+    const badge = document.getElementById('dataBadge');
+    try {
+      const res = await fetch(API_BASE + '/api/summary');
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      if (!applySummary(await res.json())) throw new Error('no rows');
+      live = true;
+      badge.textContent = '● Live: Azure SQL';
+      badge.style.color = '#5eead4';
+      buildChart(datasets.performance);
+    } catch (e) {
+      badge.textContent = 'Sample data (backend offline)';
+    }
+  }
 
   const insightTexts = {
     performance: "Total revenue reached $13.7 million this quarter, up 18% from last quarter. APAC was the standout, growing 34% and now the largest contributor — North America held steady, while EMEA softened.",
@@ -177,9 +232,10 @@
 
     const spacing = 1.3;
     const startX = -((data.length - 1) * spacing) / 2;
+    const maxVal = Math.max(...data.map(d => d.value), 1);
 
     data.forEach((d, i) => {
-      const height = d.value * 0.45;
+      const height = Math.max(d.value / maxVal * 3.2, 0.05);
       const geometry = new THREE.BoxGeometry(0.8, height, 0.8);
       const material = new THREE.MeshStandardMaterial({ color: d.color, transparent: true, opacity: 0 });
       const bar = new THREE.Mesh(geometry, material);
@@ -190,7 +246,7 @@
       scene.add(bar);
 
       const label = document.createElement('div');
-      label.textContent = '$' + d.value.toFixed(1) + 'M';
+      label.textContent = fmtMoney(d.value);
       label.style.position = 'absolute';
       label.style.fontFamily = 'system-ui, sans-serif';
       label.style.fontSize = '12px';
@@ -205,17 +261,27 @@
     });
   }
 
-  function showInsight(key) {
+  async function showInsight(key, freeText) {
     buildChart(datasets[key]);
     const insightEl = document.getElementById('insightText');
+    const tag = document.getElementById('insightTag');
     insightEl.style.opacity = '0.4';
     insightEl.textContent = 'Generating insight...';
-    setTimeout(() => {
-      const text = insightTexts[key];
-      insightEl.textContent = text;
-      insightEl.style.opacity = '1';
-      speak(text);
-    }, 600);
+    let text = insightTexts[key];
+    tag.textContent = 'AI-NARRATED INSIGHT (SAMPLE)';
+    try {
+      const q = freeText || QUESTIONS[key];
+      const res = await fetch(API_BASE + '/api/insight?question=' + encodeURIComponent(q));
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const body = await res.json();
+      text = body.insight;
+      tag.textContent = body.source === 'llm' ? 'AI-GENERATED INSIGHT' : 'DATA-DRIVEN INSIGHT (LLM OFFLINE)';
+    } catch (e) {
+      await new Promise(r => setTimeout(r, 400));
+    }
+    insightEl.textContent = text;
+    insightEl.style.opacity = '1';
+    speak(text);
   }
 
   document.querySelectorAll('.q-btn').forEach(btn => {
@@ -225,6 +291,7 @@
   });
 
   buildChart(datasets.performance);
+  loadLiveData();
 
   const micBtn = document.getElementById('micBtn');
   const micStatus = document.getElementById('micStatus');
@@ -254,9 +321,8 @@
       const said = e.results[0][0].transcript;
       const matched = matchQuestion(said);
       micStatus.textContent = `Heard: "${said}"`;
-      if (matched) {
-        showInsight(matched);
-      }
+      // Known phrasing picks the matching chart; anything else is sent to the API as-is.
+      showInsight(matched || 'performance', matched ? null : said);
     });
 
     recognition.addEventListener('error', () => {
