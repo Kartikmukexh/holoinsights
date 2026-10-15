@@ -35,3 +35,9 @@ backend/.env
 
 # Visual Studio solution cache
 .vs/
+
+# Meta Quest generated builds
+/QuestBuilds/
+
+# Unity temporary files
+/unity/.utmp/
