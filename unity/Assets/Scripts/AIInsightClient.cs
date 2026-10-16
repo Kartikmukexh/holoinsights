@@ -35,7 +35,9 @@ public class AIInsightClient : MonoBehaviour
         requestVersion++;
 
         if (activeRequest != null)
+        {
             StopCoroutine(activeRequest);
+        }
 
         activeRequest = StartCoroutine(
             FetchInsightCoroutine(requestVersion)
@@ -44,7 +46,14 @@ public class AIInsightClient : MonoBehaviour
 
     private IEnumerator FetchInsightCoroutine(int version)
     {
-        string question = "Which region is underperforming?";
+        // Ask Gemini for a short, complete insight
+        // that fits comfortably inside the Quest dashboard.
+        string question =
+            "Which region is underperforming? " +
+            "Answer in one very short, complete sentence, " +
+            "ideally under 80 characters. " +
+            "Include the key percentages. " +
+            "Do not add extra explanations or bullet points.";
 
         string url = apiUrl + "?question=" +
                      UnityWebRequest.EscapeURL(question);
@@ -52,35 +61,56 @@ public class AIInsightClient : MonoBehaviour
         using (UnityWebRequest request = UnityWebRequest.Get(url))
         {
             request.timeout = 15;
+
             yield return request.SendWebRequest();
 
             if (version != requestVersion)
+            {
                 yield break;
+            }
 
             if (request.result != UnityWebRequest.Result.Success)
             {
-                Debug.LogWarning("AI request failed: " + request.error);
+                Debug.LogWarning(
+                    "AI request failed: " + request.error
+                );
+
                 yield break;
             }
 
-            AIInsightResponse response =
-                JsonUtility.FromJson<AIInsightResponse>(
-                    request.downloadHandler.text
-                );
-
-            if (response != null &&
-                response.insight_type == "llm" &&
-                !string.IsNullOrEmpty(response.insight))
+            try
             {
-                insightText.text =
-                    "GEMINI AI INSIGHT\n" + response.insight;
+                AIInsightResponse response =
+                    JsonUtility.FromJson<AIInsightResponse>(
+                        request.downloadHandler.text
+                    );
 
-                Debug.Log("HoloInsights Gemini insight received.");
+                if (response != null &&
+                    response.insight_type == "llm" &&
+                    !string.IsNullOrEmpty(response.insight))
+                {
+                    // Display the complete AI-generated sentence.
+                    string shortInsight = response.insight.Trim();
+
+                    insightText.text =
+                        "GEMINI AI INSIGHT\n" + shortInsight;
+
+                    Debug.Log(
+                        "HoloInsights Gemini insight received."
+                    );
+                }
+                else
+                {
+                    Debug.LogWarning(
+                        "Live AI unavailable; retaining local insight."
+                    );
+                }
             }
-            else
+            catch (Exception exception)
             {
                 Debug.LogWarning(
-                    "Live AI unavailable; retaining local insight."
+                    "Failed to parse AI insight: " +
+                    exception.Message
                 );
             }
         }
