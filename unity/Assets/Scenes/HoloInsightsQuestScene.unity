@@ -3933,6 +3933,7 @@ GameObject:
   - component: {fileID: 1695601772}
   - component: {fileID: 1695601773}
   - component: {fileID: 1695601774}
+  - component: {fileID: 1695601775}
   m_Layer: 0
   m_Name: HoloInsightsDashboard
   m_TagString: Untagged
@@ -3949,7 +3950,7 @@ Transform:
   m_GameObject: {fileID: 1695601771}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0, y: 1.4, z: 1.2}
+  m_LocalPosition: {x: -0, y: 1.2, z: 1.8}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -3989,6 +3990,7 @@ MonoBehaviour:
   productCLabel: {fileID: 494910610}
   insightText: {fileID: 1157754205}
   salesDataClient: {fileID: 1695601774}
+  aiInsightClient: {fileID: 1695601775}
   maximumRevenue: 100000
   maximumBarHeight: 0.45
   barBaselineY: -0.35
@@ -4005,6 +4007,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SalesDataClient
   apiUrl: http://127.0.0.1:8000/api/sales-data
+  useOfflineDataOnAndroid: 1
+--- !u!114 &1695601775
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1695601771}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b4f668fb5b521344389bc91ac2b71479, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AIInsightClient
+  apiUrl: http://127.0.0.1:8000/api/insight
+  insightText: {fileID: 1157754205}
 --- !u!1 &1747886769
 GameObject:
   m_ObjectHideFlags: 0
@@ -4256,6 +4273,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6391579207171690961, guid: 86a5bf68cb51f4e44bd3893bd22a2ba7, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6484816944661230508, guid: 86a5bf68cb51f4e44bd3893bd22a2ba7, type: 3}
+      propertyPath: m_BackGroundColor.a
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7460734852215867547, guid: 86a5bf68cb51f4e44bd3893bd22a2ba7, type: 3}

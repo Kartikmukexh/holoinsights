@@ -21,6 +21,9 @@ public class DashboardController : MonoBehaviour
     [Header("Backend")]
     public SalesDataClient salesDataClient;
 
+    [Header("AI")]
+    public AIInsightClient aiInsightClient;
+
     [Header("Chart Settings")]
     public float maximumRevenue = 100000f;
     public float maximumBarHeight = 0.45f;
@@ -83,14 +86,13 @@ public class DashboardController : MonoBehaviour
     }
 
     // Called by keyboard, desktop mouse or XR selection.
-    // Existing button, keyboard and XR interaction.
     public void SwitchDataset()
     {
         datasetIndex = (datasetIndex + 1) % 4;
         RefreshDashboard();
     }
 
-    // Switch between North and South without changing the quarter.
+    // Switch between North and South.
     public void SwitchRegion()
     {
         datasetIndex = datasetIndex % 2 == 0
@@ -100,7 +102,7 @@ public class DashboardController : MonoBehaviour
         RefreshDashboard();
     }
 
-    // Switch between Q1 and Q2 without changing the region.
+    // Switch between Q1 and Q2.
     public void SwitchQuarter()
     {
         datasetIndex = (datasetIndex + 2) % 4;
@@ -139,9 +141,14 @@ public class DashboardController : MonoBehaviour
         SetBar(productBBar, b);
         SetBar(productCBar, c);
 
-        productALabel.text = "A - " + (a / 1000f).ToString("0.#") + "K";
-        productBLabel.text = "B - " + (b / 1000f).ToString("0.#") + "K";
-        productCLabel.text = "C - " + (c / 1000f).ToString("0.#") + "K";
+        productALabel.text =
+            "A - " + (a / 1000f).ToString("0.#") + "K";
+
+        productBLabel.text =
+            "B - " + (b / 1000f).ToString("0.#") + "K";
+
+        productCLabel.text =
+            "C - " + (c / 1000f).ToString("0.#") + "K";
 
         float highestRevenue = Mathf.Max(a, b, c);
         string leadingProduct = "Product A";
@@ -155,6 +162,8 @@ public class DashboardController : MonoBehaviour
             leadingProduct = "Product C";
         }
 
+        // Show a local insight immediately.
+        // This remains visible if the AI request fails.
         insightText.text =
             region + " " + quarter + " | " +
             leadingProduct + " leads with $" +
@@ -162,9 +171,19 @@ public class DashboardController : MonoBehaviour
             "K revenue.\nSource: " +
             salesResponse.source +
             " (data-derived summary)";
+
+        // Request a Gemini-generated insight.
+        if (aiInsightClient != null)
+        {
+            aiInsightClient.FetchInsight();
+        }
     }
 
-    private float GetRevenue(string product, string region, string quarter)
+    private float GetRevenue(
+        string product,
+        string region,
+        string quarter
+    )
     {
         float total = 0f;
 
@@ -183,8 +202,9 @@ public class DashboardController : MonoBehaviour
 
     private void SetBar(Transform bar, float revenue)
     {
-        float ratio = Mathf.Max(0f, revenue) /
-                      Mathf.Max(1f, maximumRevenue);
+        float ratio =
+            Mathf.Max(0f, revenue) /
+            Mathf.Max(1f, maximumRevenue);
 
         float height = maximumBarHeight * ratio;
 
